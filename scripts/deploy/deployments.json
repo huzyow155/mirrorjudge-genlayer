@@ -1,0 +1,22 @@
+{
+  "network": "studionet",
+  "chainId": 61999,
+  "rpcUrl": "https://studio.genlayer.com/api",
+  "explorerBaseUrl": "https://explorer-studio.genlayer.com/address/",
+  "contractAddress": "0x30552D40A956d2D753AbAD429c90cB07f65Dabd0",
+  "deployTxHash": "0xb49227544fa1e4ba1631c8b422cf42438f5d355480a14540972509660693d5c7",
+  "consumerContractAddress": "0x6E295655a39A5f9aDFF8B087497737788aCC8881",
+  "consumerDeployTxHash": "0x996cbc9368429a664ab4c74972a21d2f355989dd8558a120d4c6a6e7f88e6a0f",
+  "commitHash": "82f6818",
+  "sourceSha256": "1f4c4f1bdf5e58177adc780fafe5bfa22c6f786d6e78e3585062c98c2bacf1ee",
+  "supersededAddresses": [
+    {
+      "address": "0xd146F4102dCca75dF2977091A3aFd3307D236f78",
+      "reason": "Milestone 1 MirrorJudgeCore prototype"
+    },
+    {
+      "address": "0x2106760ca2BD2a55be57A8B68373F65afCdc2Fe2",
+      "reason": "Milestone 0 Probe runtime diagnostic"
+    }
+  ]
+}
