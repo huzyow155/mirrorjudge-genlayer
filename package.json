@@ -1,0 +1,22 @@
+{
+  "name": "mirrorjudge-genlayer",
+  "version": "1.0.0",
+  "description": "MirrorJudge Intelligent Contract on GenLayer: swap-consistent two-party dispute adjudication",
+  "main": "index.js",
+  "scripts": {
+    "test": "python -m unittest discover tests"
+  },
+  "keywords": [
+    "genlayer",
+    "intelligent-contracts",
+    "dispute-resolution",
+    "swap-consistency",
+    "debiasing"
+  ],
+  "author": "huzyow155",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "genlayer-js": "^1.1.8"
+  }
+}
