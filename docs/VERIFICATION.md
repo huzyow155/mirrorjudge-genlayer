@@ -9,7 +9,7 @@
 - **Explorer URL**: [0x30552D40A956d2D753AbAD429c90cB07f65Dabd0](https://explorer-studio.genlayer.com/address/0x30552D40A956d2D753AbAD429c90cB07f65Dabd0)
 - **Consumer Contract Address**: `0x6E295655a39A5f9aDFF8B087497737788aCC8881`
 - **Consumer Explorer URL**: [0x6E295655a39A5f9aDFF8B087497737788aCC8881](https://explorer-studio.genlayer.com/address/0x6E295655a39A5f9aDFF8B087497737788aCC8881)
-- **Commit Hash**: `82f6818`
+- **Commit Hash**: `b574af4`
 
 ---
 
