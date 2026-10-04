@@ -87,6 +87,82 @@ class TestLayer3Consensus(unittest.TestCase):
         self.assertTrue(outcome["agreed"])
         self.assertEqual(outcome["consensus_value"], "DECIDED|PARTY_1|STABLE")
 
+    def test_scenario_a_clear_party_1_evidence(self):
+        criteria = [{"id": "c1", "text": "Completion", "weight_bp": 10000}]
+        obs = {"c1": P1}
+        dec = _round_decision(criteria, obs, obs, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "DECIDED|PARTY_1|STABLE")
+
+    def test_scenario_b_clear_party_2_evidence(self):
+        criteria = [{"id": "c1", "text": "Completion", "weight_bp": 10000}]
+        obs = {"c1": P2}
+        dec = _round_decision(criteria, obs, obs, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "DECIDED|PARTY_2|STABLE")
+
+    def test_scenario_c_balanced_contradictory_claims_converge(self):
+        """
+        Scenario C: Contradictory self-serving claims with no external documentation.
+        Under hardened prompt instructions, validator LLMs evaluate both passes as NEITHER.
+        """
+        criteria = [
+            {"id": "crit_1", "text": "Timely milestone deliverable completion", "weight_bp": 5000},
+            {"id": "crit_2", "text": "Code specifications and test coverage", "weight_bp": 5000}
+        ]
+        # Canonical pass extracts NEITHER for both criteria
+        can_obs = {"crit_1": "NEITHER", "crit_2": "NEITHER"}
+        # Mirrored pass extracts NEITHER for both criteria (and swapping NEITHER remains NEITHER)
+        mir_obs = {"crit_1": "NEITHER", "crit_2": "NEITHER"}
+
+        dec = _round_decision(criteria, can_obs, mir_obs, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "DECIDED|SPLIT|STABLE")
+
+        # Multi-validator consensus simulation
+        outcome = simulate_strict_eq([lambda: dec, lambda: dec, lambda: dec])
+        self.assertTrue(outcome["agreed"])
+        self.assertEqual(outcome["consensus_value"], "DECIDED|SPLIT|STABLE")
+
+    def test_scenario_d_benchmark_case_a(self):
+        # Case A: Clear admission in favor of Party 1
+        criteria = [
+            {"id": "milestone_delivery", "text": "Delivery", "weight_bp": 6000},
+            {"id": "spec_compliance", "text": "Compliance", "weight_bp": 4000}
+        ]
+        obs = {"milestone_delivery": P1, "spec_compliance": P1}
+        dec = _round_decision(criteria, obs, obs, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "DECIDED|PARTY_1|STABLE")
+
+    def test_scenario_e_benchmark_case_b(self):
+        # Case B: Shared balanced performance
+        criteria = [
+            {"id": "comp_a", "text": "Component A", "weight_bp": 5000},
+            {"id": "comp_b", "text": "Component B", "weight_bp": 5000}
+        ]
+        obs = {"comp_a": P1, "comp_b": P2}
+        dec = _round_decision(criteria, obs, obs, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "DECIDED|SPLIT|STABLE")
+
+    def test_scenario_g_malformed_llm_json_fails_safely(self):
+        criteria = [{"id": "c1", "text": "Factual compliance", "weight_bp": 10000}]
+        # Malformed raw LLM output returns {}
+        from tests.helpers_for_test import _parse
+        parsed = _parse("invalid non-json output ``````")
+        cleaned = _clean_obs(criteria, parsed, "some text")
+        # All criteria default safely to UNCLEAR
+        self.assertEqual(cleaned["c1"], "UNCLEAR")
+        dec = _round_decision(criteria, cleaned, cleaned, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "INSUFFICIENT|NONE|NA")
+
+    def test_scenario_h_ungrounded_quote_fails_safely(self):
+        criteria = [{"id": "c1", "text": "Factual compliance", "weight_bp": 10000}]
+        evidence_text = "[PARTY_1] says: Real authentic evidence text recorded on chain."
+        # LLM claims PARTY_1 but invents a quote not in the evidence
+        hallucinated = {"results": {"c1": {"favors": P1, "quote": "completely fabricated statement never made"}}}
+        cleaned = _clean_obs(criteria, hallucinated, evidence_text)
+        # Grounding check downgrades to UNCLEAR
+        self.assertEqual(cleaned["c1"], "UNCLEAR")
+        dec = _round_decision(criteria, cleaned, cleaned, margin_bp=1500, max_flips=1)
+        self.assertEqual(dec, "INSUFFICIENT|NONE|NA")
+
 
 if __name__ == '__main__':
     unittest.main()
