@@ -100,45 +100,44 @@
   "caseC": {
     "caseId": "bf29f5d7c7fd",
     "openTx": "0x131fc2a2a4add071c37c32288521c0997214283620b8aa1ca26dd288974fc6bb",
-    "round1": {
-      "ev1Tx": "0xebeed5a505a181cf26d864d8a7d015d1852da7a2a17f60573a12fccc7e9e0c18",
-      "ev2Tx": "0xeb20f2398abac03dad399743c47501e953e2a29738c88b6b2382916e519339c3",
-      "judgeTx": "0x81643659e4341a05cae0841f5b4bad68e4193b93660af328af34d53b7aeb4662",
-      "judgeLatencySec": "31.49",
-      "receiptStatus": "ACCEPTED",
-      "receiptResult": "MAJORITY_AGREE",
-      "leaderResult": "SUCCESS",
-      "certificate": {
-        "schema_version": "1.0",
-        "case_id": "bf29f5d7c7fd",
-        "title": "API Gateway Infrastructure SLA Milestone Dispute",
-        "opener": "0xf77fd09910D52B3A3AAFe52E4c3938C2d69a8B78",
-        "opposing": "0x2d35C23688A1138B0CE142748e47f234db1FB569",
-        "status": "JUDGED",
-        "config": {
-          "margin_bp": 1500,
-          "max_flips": 1,
-          "max_rounds": 3,
-          "criteria": [
-            {
-              "id": "sla_maintenance",
-              "text": "Which party substantiated superior system uptime and SLA maintenance: PARTY_1 or PARTY_2?",
-              "weight_bp": 10000
-            }
-          ]
-        },
-        "rounds": [
+    "ev1Tx": "0xebeed5a505a181cf26d864d8a7d015d1852da7a2a17f60573a12fccc7e9e0c18",
+    "ev2Tx": "0xeb20f2398abac03dad399743c47501e953e2a29738c88b6b2382916e519339c3",
+    "judgeTx": "0x81643659e4341a05cae0841f5b4bad68e4193b93660af328af34d53b7aeb4662",
+    "judgeLatencySec": "31.49",
+    "receiptStatus": "ACCEPTED",
+    "receiptResult": "MAJORITY_AGREE",
+    "leaderResult": "SUCCESS",
+    "certificate": {
+      "schema_version": "1.0",
+      "case_id": "bf29f5d7c7fd",
+      "title": "API Gateway Infrastructure SLA Milestone Dispute",
+      "opener": "0xf77fd09910D52B3A3AAFe52E4c3938C2d69a8B78",
+      "opposing": "0x2d35C23688A1138B0CE142748e47f234db1FB569",
+      "status": "JUDGED",
+      "config": {
+        "margin_bp": 1500,
+        "max_flips": 1,
+        "max_rounds": 3,
+        "criteria": [
           {
-            "n": 1,
-            "decision": "DECIDED|SPLIT|STABLE"
+            "id": "sla_maintenance",
+            "text": "Which party substantiated superior system uptime and SLA maintenance: PARTY_1 or PARTY_2?",
+            "weight_bp": 10000
           }
-        ],
-        "current_decision": "DECIDED|SPLIT|STABLE",
-        "is_decided": true,
-        "outcome": "SPLIT"
-      }
+        ]
+      },
+      "rounds": [
+        {
+          "n": 1,
+          "decision": "DECIDED|SPLIT|STABLE"
+        }
+      ],
+      "current_decision": "DECIDED|SPLIT|STABLE",
+      "is_decided": true,
+      "outcome": "SPLIT"
     },
-    "round2": {
+    "revertTest_caseAlreadyDecided": {
+      "note": "Subsequent judge() call on this already-decided case correctly raised gl.vm.UserError('case already decided') and rolled back atomically",
       "ev3Tx": "0x1139aba1b7213d6dc9f0bae1de6dfde1b50ff5e6ad622fcd2f40c15963e10c35",
       "ev4Tx": "0x00d429f7c251427a67c4170910748dd187a50d101bc9e925bf95f51a1f314463",
       "judgeTx": "0x9f58fabeffbeec7bab70292c5cad3cb32138491dc0a4d766e92c3f9f10d983fc",
@@ -146,35 +145,56 @@
       "receiptStatus": "ACCEPTED",
       "receiptResult": "MAJORITY_AGREE",
       "leaderResult": "ERROR",
-      "certificate": {
-        "schema_version": "1.0",
-        "case_id": "bf29f5d7c7fd",
-        "title": "API Gateway Infrastructure SLA Milestone Dispute",
-        "opener": "0xf77fd09910D52B3A3AAFe52E4c3938C2d69a8B78",
-        "opposing": "0x2d35C23688A1138B0CE142748e47f234db1FB569",
-        "status": "JUDGED",
-        "config": {
-          "margin_bp": 1500,
-          "max_flips": 1,
-          "max_rounds": 3,
-          "criteria": [
-            {
-              "id": "sla_maintenance",
-              "text": "Which party substantiated superior system uptime and SLA maintenance: PARTY_1 or PARTY_2?",
-              "weight_bp": 10000
-            }
-          ]
-        },
-        "rounds": [
+      "leaderErrorMessage": "case already decided",
+      "stateRemainsUntouched": true
+    }
+  },
+  "contradictoryTest": {
+    "caseId": "74320c3924e2",
+    "title": "Contradictory Milestone Delivery Review",
+    "opener": "0x391f6a38c5f0fB025FB99113E1DE66366C6e784E",
+    "opposing": "0x3bac28E178C11D752c22EA4A357a4959DcC0Ae9E",
+    "openTx": "0x332392b309a0a5e72f782de226c6f38de8e98ed09b9047977862510313b7b549",
+    "ev1Tx": "0x9542a9578089d34a71d2b049ef4af5b0c82c97a58825fa9f4495583723a90395",
+    "ev2Tx": "0xea17632293f0bfce03eee4483eb4b2eb258fe39c085a7c8c93e1932a5f0bbb58",
+    "judgeTx": "0xb479e9f1746dbf138287c9580182982305dcf4f53934475f52e6b9833e270c47",
+    "judgeLatencySec": "15.07",
+    "receiptStatus": "ACCEPTED",
+    "receiptResult": "MAJORITY_AGREE",
+    "leaderResult": "SUCCESS",
+    "certificate": {
+      "schema_version": "1.0",
+      "case_id": "74320c3924e2",
+      "title": "Contradictory Milestone Delivery Review",
+      "opener": "0x391f6a38c5f0fB025FB99113E1DE66366C6e784E",
+      "opposing": "0x3bac28E178C11D752c22EA4A357a4959DcC0Ae9E",
+      "status": "JUDGED",
+      "config": {
+        "margin_bp": 1500,
+        "max_flips": 1,
+        "max_rounds": 3,
+        "criteria": [
           {
-            "n": 1,
-            "decision": "DECIDED|SPLIT|STABLE"
+            "id": "crit_1",
+            "text": "Timely milestone deliverable completion",
+            "weight_bp": 5000
+          },
+          {
+            "id": "crit_2",
+            "text": "Code specifications and test coverage",
+            "weight_bp": 5000
           }
-        ],
-        "current_decision": "DECIDED|SPLIT|STABLE",
-        "is_decided": true,
-        "outcome": "SPLIT"
-      }
+        ]
+      },
+      "rounds": [
+        {
+          "n": 1,
+          "decision": "DECIDED|SPLIT|STABLE"
+        }
+      ],
+      "current_decision": "DECIDED|SPLIT|STABLE",
+      "is_decided": true,
+      "outcome": "SPLIT"
     }
   }
 }

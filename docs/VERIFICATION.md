@@ -132,20 +132,19 @@ Byte-for-Byte Match:     true
 
 ---
 
-### 3. Case C: Multi-Round Escalation Dispute (`DECIDED|SPLIT|STABLE`)
+### 3. Case C: Balanced Performance Dispute (`DECIDED|SPLIT|STABLE`)
 - **Case ID**: `bf29f5d7c7fd`
 - **Title**: `API Gateway Infrastructure SLA Milestone Dispute`
 - **Open Transaction**: `0x131fc2a2a4add071c37c32288521c0997214283620b8aa1ca26dd288974fc6bb`
-
-#### Round 1 (Balanced Performance)
 - **Party 1 Ev1 Tx**: `0xebeed5a505a181cf26d864d8a7d015d1852da7a2a17f60573a12fccc7e9e0c18`
 - **Party 2 Ev2 Tx**: `0xeb20f2398abac03dad399743c47501e953e2a29738c88b6b2382916e519339c3`
-- **Round 1 Judge Tx**: `0x81643659e4341a05cae0841f5b4bad68e4193b93660af328af34d53b7aeb4662`
+- **Judge Tx**: `0x81643659e4341a05cae0841f5b4bad68e4193b93660af328af34d53b7aeb4662`
 - **Status**: `ACCEPTED`
 - **Consensus Result**: `MAJORITY_AGREE`
 - **Leader Execution Result**: `SUCCESS`
 - **Measured Latency**: `31.49s`
-- **Round 1 Decision**: `DECIDED|SPLIT|STABLE`
+- **Round Decision**: `DECIDED|SPLIT|STABLE`
+- **Outcome**: `SPLIT`
 - **Verified Stability Certificate**:
 ```json
 {
@@ -183,10 +182,16 @@ Byte-for-Byte Match:     true
 
 ### 4. Hardened Dispute Verification: Unsupported Contradictory Claims
 - **Case ID**: `74320c3924e2`
-- **Title**: `Production Milestone Dispute (Hardened Consensus Verification)`
+- **Title**: `Contradictory Milestone Delivery Review`
+- **Opener**: `0x391f6a38c5f0fB025FB99113E1DE66366C6e784E`
+- **Opposing**: `0x3bac28E178C11D752c22EA4A357a4959DcC0Ae9E`
+- **Open Transaction**: `0x332392b309a0a5e72f782de226c6f38de8e98ed09b9047977862510313b7b549`
+- **Party 1 Evidence Tx**: `0x9542a9578089d34a71d2b049ef4af5b0c82c97a58825fa9f4495583723a90395`
+- **Party 2 Evidence Tx**: `0xea17632293f0bfce03eee4483eb4b2eb258fe39c085a7c8c93e1932a5f0bbb58`
 - **Judge Transaction**: `0xb479e9f1746dbf138287c9580182982305dcf4f53934475f52e6b9833e270c47`
 - **Measured Latency**: `15.07s`
 - **Receipt Status**: `ACCEPTED`
+- **Consensus Result**: `MAJORITY_AGREE`
 - **Leader Execution**: `SUCCESS`
 - **Round Decision**: `DECIDED|SPLIT|STABLE`
 - **Outcome**: `SPLIT`
