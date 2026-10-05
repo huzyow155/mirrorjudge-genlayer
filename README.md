@@ -7,8 +7,8 @@
 
 **MirrorJudge** is an Intelligent Contract on GenLayer designed to eliminate order bias and presentation sensitivity in AI-assisted dispute resolution. It implements deterministic anonymization, dual-pass mirroring, code-verified quote grounding, and weighted multi-criteria aggregation to produce verified on-chain **Stability Certificates**.
 
-- **Deployed Contract Address**: [`0x30552D40A956d2D753AbAD429c90cB07f65Dabd0`](https://explorer-studio.genlayer.com/address/0x30552D40A956d2D753AbAD429c90cB07f65Dabd0)
-- **Downstream Consumer Contract**: [`0x6E295655a39A5f9aDFF8B087497737788aCC8881`](https://explorer-studio.genlayer.com/address/0x6E295655a39A5f9aDFF8B087497737788aCC8881)
+- **Deployed Contract Address**: [`0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17`](https://explorer-studio.genlayer.com/address/0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17)
+- **Downstream Consumer Contract**: [`0x294FFDec366826F8682CFAAEbaf25DcAeBda9317`](https://explorer-studio.genlayer.com/address/0x294FFDec366826F8682CFAAEbaf25DcAeBda9317)
 - **Network**: GenLayer Studionet (Chain ID: `61999`, Status: Preview)
 
 ---
@@ -163,7 +163,7 @@ class EscrowConsumer(gl.Contract):
             return "ESCALATED_TO_ARBITRATOR"
 ```
 
-A live deployed consumer contract is verified on Studionet at [`0x6E295655a39A5f9aDFF8B087497737788aCC8881`](https://explorer-studio.genlayer.com/address/0x6E295655a39A5f9aDFF8B087497737788aCC8881).
+A live deployed consumer contract is verified on Studionet at [`0x294FFDec366826F8682CFAAEbaf25DcAeBda9317`](https://explorer-studio.genlayer.com/address/0x294FFDec366826F8682CFAAEbaf25DcAeBda9317).
 
 ---
 

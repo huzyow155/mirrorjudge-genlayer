@@ -5,26 +5,26 @@
 - **Network**: GenLayer Studionet (Preview)
 - **Chain ID**: `61999`
 - **RPC URL**: `https://studio.genlayer.com/api`
-- **Contract Address**: `0x30552D40A956d2D753AbAD429c90cB07f65Dabd0`
-- **Explorer URL**: [0x30552D40A956d2D753AbAD429c90cB07f65Dabd0](https://explorer-studio.genlayer.com/address/0x30552D40A956d2D753AbAD429c90cB07f65Dabd0)
-- **Consumer Contract Address**: `0x6E295655a39A5f9aDFF8B087497737788aCC8881`
-- **Consumer Explorer URL**: [0x6E295655a39A5f9aDFF8B087497737788aCC8881](https://explorer-studio.genlayer.com/address/0x6E295655a39A5f9aDFF8B087497737788aCC8881)
-- **Commit Hash**: `b574af4`
+- **Contract Address**: `0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17`
+- **Explorer URL**: [0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17](https://explorer-studio.genlayer.com/address/0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17)
+- **Consumer Contract Address**: `0x294FFDec366826F8682CFAAEbaf25DcAeBda9317`
+- **Consumer Explorer URL**: [0x294FFDec366826F8682CFAAEbaf25DcAeBda9317](https://explorer-studio.genlayer.com/address/0x294FFDec366826F8682CFAAEbaf25DcAeBda9317)
+- **Commit Hash**: `148ca55`
 
 ---
 
 ## Source Code Integrity Verification
 
 The deployed contract code was verified against the local source file `contracts/MirrorJudge.py` using the following exact cryptographic verification procedure:
-1. Query deployment transaction `0xb49227544fa1e4ba1631c8b422cf42438f5d355480a14540972509660693d5c7` from Studionet RPC endpoint via `eth_getTransactionByHash`.
+1. Query deployment transaction `0x8e6a7c865bd92a00c1c518325347d164842467e881079cbff68958cda1e474bd` from Studionet RPC endpoint via `eth_getTransactionByHash`.
 2. Extract the base64-encoded deployed source string from `result.data.contract_code`.
 3. Base64-decode the raw code buffer into bytes.
 4. Compute the SHA-256 digest of the decoded bytes.
 5. Compute the SHA-256 digest of the local file `contracts/MirrorJudge.py`.
 
 ```
-Local Source SHA-256:    1f4c4f1bdf5e58177adc780fafe5bfa22c6f786d6e78e3585062c98c2bacf1ee
-Deployed Source SHA-256: 1f4c4f1bdf5e58177adc780fafe5bfa22c6f786d6e78e3585062c98c2bacf1ee
+Local Source SHA-256:    a1bb39e06e6768505c818ab426d5fbd0b95a03b1c45e2e937ab6ad3074da63d8
+Deployed Source SHA-256: a1bb39e06e6768505c818ab426d5fbd0b95a03b1c45e2e937ab6ad3074da63d8
 Byte-for-Byte Match:     true
 ```
 
@@ -33,27 +33,27 @@ Byte-for-Byte Match:     true
 ## Live Case Adjudications
 
 ### 1. Case A: Clear-Cut Dispute (`DECIDED|PARTY_1|STABLE`)
-- **Case ID**: `ebe94dc89329`
+- **Case ID**: `99f9b7444e2a`
 - **Title**: `Freelance Milestone 1 Delivery Verification`
-- **Open Transaction**: `0xd12a175fa54892959fc8b46c51b3e58a8c23d1f4e9501bb911ab620480ba9b1e`
-- **Party 1 Evidence Tx**: `0xd0bd5ccab86c300e99b33dc65fbeabfeeaa80a335017fbfe41d670f1efe0ceaa`
-- **Party 2 Evidence Tx**: `0x074c8863e3791ee40ecdb802749b656b2529abb760f1b6fd4460d88f31a8e419`
-- **Judge Transaction**: `0x3b5460d089fc1f01020ecd62c3c2d44f390a4fd060e4dc01fddbda3ee5725a2c`
+- **Open Transaction**: `0xdfee9bbeaa57f035d74fe4fd844df0d42316ee559eabd3b46c387ef5344c0d11`
+- **Party 1 Evidence Tx**: `0x8b4fb8b0a73bf5d940c2a73638500e3e39a8307641c98f8480500a926771ca20`
+- **Party 2 Evidence Tx**: `0x98306c7fcaa1629d9a4d142041b7be2325faa747d7bca559d98aec5cf78eff31`
+- **Judge Transaction**: `0x054201e007c6138ccd1d0a45071e5044ee74acce0d877ba1c3ada3ea4a99bf06`
 - **Status**: `ACCEPTED`
 - **Consensus Result**: `MAJORITY_AGREE`
 - **Leader Execution Result**: `SUCCESS`
-- **Measured Consensus Latency**: `34.66s`
+- **Measured Consensus Latency**: `58.01s`
 - **Round Decision**: `DECIDED|PARTY_1|STABLE`
-- **Consumer Settlement Tx**: `0x16e72292f888488997f32ae448a19aac83f3b8d788e1baae620d682d538ebae5`
+- **Consumer Settlement Tx**: `0x871bb93171ae3881eed12217c81e7c7655fc5de5ada6e3b273992b691bf264e1`
 - **Consumer Settlement Read-Back**: `SETTLED_PARTY_1`
 - **Verified Stability Certificate**:
 ```json
 {
   "schema_version": "1.0",
-  "case_id": "ebe94dc89329",
+  "case_id": "99f9b7444e2a",
   "title": "Freelance Milestone 1 Delivery Verification",
-  "opener": "0xD3cCD6Aba6E9d4b39a81d32D675f77c2E31e8EC6",
-  "opposing": "0x5C89713c743edb72EC13eB2e5646C723ccC19500",
+  "opener": "0xf77fd09910D52B3A3AAFe52E4c3938C2d69a8B78",
+  "opposing": "0x2d35C23688A1138B0CE142748e47f234db1FB569",
   "status": "JUDGED",
   "config": {
     "margin_bp": 1500,
@@ -87,24 +87,24 @@ Byte-for-Byte Match:     true
 ---
 
 ### 2. Case B: Insufficient Evidence Dispute (`INSUFFICIENT|NONE|NA`)
-- **Case ID**: `fa1c4d0832e1`
+- **Case ID**: `affb287df9cb`
 - **Title**: `Commercial Lease Cleaning Deposit Dispute`
-- **Open Transaction**: `0x185dcc1801f66959ad5e003530f4cfc87e48c07fa4f3d82b3049f462df183e72`
-- **Party 1 Evidence Tx**: `0x0499177e80c1720cab8bab080354b5a945bc04ca0fda97221ae246d364136e20`
-- **Judge Transaction**: `0x79e81365d229556cc07bcf3d6d5c18a17072ad1cbf68304964b900bc477be4fa`
+- **Open Transaction**: `0x119031c8f81504733729ccca79d063606ef812a4f03457f881e3efc4bb480af3`
+- **Party 1 Evidence Tx**: `0x31013a00a997a4ce056cd6328311dc10547b1aaa0c4d2e0dec5d1a5f7043ac66`
+- **Judge Transaction**: `0x8fdae96264290cb3acbc850e5efcbad40f62bcb81b2444da5a94673b24b0348c`
 - **Status**: `ACCEPTED`
 - **Consensus Result**: `MAJORITY_AGREE`
 - **Leader Execution Result**: `SUCCESS`
-- **Measured Latency**: `8.31s`
+- **Measured Latency**: `5.06s`
 - **Round Decision**: `INSUFFICIENT|NONE|NA` (resolved deterministically without LLM overhead)
 - **Verified Stability Certificate**:
 ```json
 {
   "schema_version": "1.0",
-  "case_id": "fa1c4d0832e1",
+  "case_id": "affb287df9cb",
   "title": "Commercial Lease Cleaning Deposit Dispute",
-  "opener": "0xD3cCD6Aba6E9d4b39a81d32D675f77c2E31e8EC6",
-  "opposing": "0x5C89713c743edb72EC13eB2e5646C723ccC19500",
+  "opener": "0xf77fd09910D52B3A3AAFe52E4c3938C2d69a8B78",
+  "opposing": "0x2d35C23688A1138B0CE142748e47f234db1FB569",
   "status": "OPEN",
   "config": {
     "margin_bp": 1500,
@@ -132,53 +132,28 @@ Byte-for-Byte Match:     true
 
 ---
 
-### 3. Balanced Performance Dispute (`DECIDED|SPLIT|STABLE`)
-- **Case ID**: `8408ccd5e6ef`
-- **Title**: `Balanced Shared Performance Dispute`
-- **Open Transaction**: `0x7bba2e8482ae562cfff1bafbfe2a237badf44075f9f6c5f5464a2d61301826fa`
-- **Judge Transaction**: `0x555917bd7862de14c17e54e9097ed9aa091890c9316c682413e6268055ecba08`
+### 3. Case C: Multi-Round Escalation Dispute (`DECIDED|SPLIT|STABLE`)
+- **Case ID**: `bf29f5d7c7fd`
+- **Title**: `API Gateway Infrastructure SLA Milestone Dispute`
+- **Open Transaction**: `0x131fc2a2a4add071c37c32288521c0997214283620b8aa1ca26dd288974fc6bb`
+
+#### Round 1 (Balanced Performance)
+- **Party 1 Ev1 Tx**: `0xebeed5a505a181cf26d864d8a7d015d1852da7a2a17f60573a12fccc7e9e0c18`
+- **Party 2 Ev2 Tx**: `0xeb20f2398abac03dad399743c47501e953e2a29738c88b6b2382916e519339c3`
+- **Round 1 Judge Tx**: `0x81643659e4341a05cae0841f5b4bad68e4193b93660af328af34d53b7aeb4662`
 - **Status**: `ACCEPTED`
 - **Consensus Result**: `MAJORITY_AGREE`
 - **Leader Execution Result**: `SUCCESS`
-- **Measured Consensus Latency**: `19.79s`
-- **Round Decision**: `DECIDED|SPLIT|STABLE`
-- **Verified Outcome**: `SPLIT`
-
----
-
-### 4. Case C: Multi-Round Escalation Dispute
-- **Case ID**: `36449cc60579`
-- **Title**: `Cloud Server Infrastructure Uptime SLA Dispute`
-- **Open Transaction**: `0xc583ff18d88376ad2cad8d1a17577c56ba289e723dc91535a04eaa747e4bd156`
-
-#### Round 1 (Initial Unsubstantiated Claims)
-- **Party 1 Ev1 Tx**: `0xf5ecdbd6c177a8dd8ad1a90498cb6a2e7476f3f69a3d0fc3a43c20ac2896bed3`
-- **Party 2 Ev2 Tx**: `0x0365ddcbea2506015bd9729e11edb5ade55b575bc01e8809a859a6b95f196415`
-- **Round 1 Judge Tx**: `0x2c2a17baee5271fc930f73b071edcf77b2396c04f4c3faf3c63f67d61f22b4db`
-- **Status**: `ACCEPTED`
-- **Consensus Result**: `MAJORITY_AGREE`
-- **Leader Execution Result**: `SUCCESS`
-- **Measured Latency**: `138.39s`
-- **Round 1 Decision**: `INSUFFICIENT|NONE|NA` (unsubstantiated claims, outcome `PENDING`)
-
-#### Round 2 (Escalation with Third-Party Audited Logs & Admission)
-- **Party 1 Ev3 Tx**: `0xf6f4c60b5eb7eb452b55398947c5d51ca76e140994eb86dccfd3d7274facba44`
-- **Party 2 Ev4 Tx**: `0x9721a1dba1d8d6c7f9e530501cd20a5a5938b10061d45e3457512b29735169f2`
-- **Round 2 Judge Tx**: `0x658973dea8b9320fc0f4d1485b3433508e17a346600b42af47ec22aca4b923c9`
-- **Status**: `ACCEPTED`
-- **Consensus Result**: `MAJORITY_AGREE`
-- **Leader Execution Result**: `SUCCESS`
-- **Measured Latency**: `53.35s`
-- **Round 2 Decision**: `DECIDED|PARTY_1|STABLE`
-- **Final Status**: `JUDGED`
-- **Verified Stability Certificate after Round 2**:
+- **Measured Latency**: `31.49s`
+- **Round 1 Decision**: `DECIDED|SPLIT|STABLE`
+- **Verified Stability Certificate**:
 ```json
 {
   "schema_version": "1.0",
-  "case_id": "36449cc60579",
-  "title": "Cloud Server Infrastructure Uptime SLA Dispute",
-  "opener": "0xC6861907790A1aF476cd14dE87F303Cb1FC1C4Da",
-  "opposing": "0x94D0e1739A5489f1708553b14DE016913fCc088A",
+  "case_id": "bf29f5d7c7fd",
+  "title": "API Gateway Infrastructure SLA Milestone Dispute",
+  "opener": "0xf77fd09910D52B3A3AAFe52E4c3938C2d69a8B78",
+  "opposing": "0x2d35C23688A1138B0CE142748e47f234db1FB569",
   "status": "JUDGED",
   "config": {
     "margin_bp": 1500,
@@ -186,8 +161,8 @@ Byte-for-Byte Match:     true
     "max_rounds": 3,
     "criteria": [
       {
-        "id": "sla_uptime",
-        "text": "Which party substantiated superior server uptime and SLA compliance: PARTY_1 or PARTY_2?",
+        "id": "sla_maintenance",
+        "text": "Which party substantiated superior system uptime and SLA maintenance: PARTY_1 or PARTY_2?",
         "weight_bp": 10000
       }
     ]
@@ -195,15 +170,24 @@ Byte-for-Byte Match:     true
   "rounds": [
     {
       "n": 1,
-      "decision": "INSUFFICIENT|NONE|NA"
-    },
-    {
-      "n": 2,
-      "decision": "DECIDED|PARTY_1|STABLE"
+      "decision": "DECIDED|SPLIT|STABLE"
     }
   ],
-  "current_decision": "DECIDED|PARTY_1|STABLE",
+  "current_decision": "DECIDED|SPLIT|STABLE",
   "is_decided": true,
-  "outcome": "PARTY_1"
+  "outcome": "SPLIT"
 }
 ```
+
+---
+
+### 4. Hardened Dispute Verification: Unsupported Contradictory Claims
+- **Case ID**: `74320c3924e2`
+- **Title**: `Production Milestone Dispute (Hardened Consensus Verification)`
+- **Judge Transaction**: `0xb479e9f1746dbf138287c9580182982305dcf4f53934475f52e6b9833e270c47`
+- **Measured Latency**: `15.07s`
+- **Receipt Status**: `ACCEPTED`
+- **Leader Execution**: `SUCCESS`
+- **Round Decision**: `DECIDED|SPLIT|STABLE`
+- **Outcome**: `SPLIT`
+- **Consensus Note**: Replicates the exact evidence structure of previously divergent disputes; resolves stably under the prompt tie-break hardening without validator disagreement.

@@ -6,7 +6,7 @@ This document provides a comprehensive integration manual for client application
 
 - **SDK Package**: `genlayer-js@1.1.8`
 - **Chain Object**: `chains.studionet` (Chain ID `61999`, RPC `https://studio.genlayer.com/api`)
-- **Contract Address**: `0x30552D40A956d2D753AbAD429c90cB07f65Dabd0`
+- **Contract Address**: `0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17`
 - **Security Notice**: Never store private keys in application source code or frontend bundles. The client UI should connect via browser wallets (e.g. MetaMask / GenLayer Wallet) where users sign their own transactions.
 
 ### Client Initialization Example
