@@ -115,6 +115,27 @@ class TestLayer1Pure(unittest.TestCase):
         with self.assertRaises(ValueError):
             _check_criteria([{"id": "c1", "text": "Crit 1", "weight_bp": 10001}])
 
+        # Rejects individual invalid weights even if sum is 10000
+        with self.assertRaises(ValueError):
+            _check_criteria([
+                {"id": "c1", "text": "Crit 1", "weight_bp": -5000},
+                {"id": "c2", "text": "Crit 2", "weight_bp": 15000},
+            ])
+        with self.assertRaises(ValueError):
+            _check_criteria([
+                {"id": "c1", "text": "Crit 1", "weight_bp": 0},
+                {"id": "c2", "text": "Crit 2", "weight_bp": 10000},
+            ])
+        with self.assertRaises(ValueError):
+            _check_criteria([
+                {"id": "c1", "text": "Crit 1", "weight_bp": True},
+                {"id": "c2", "text": "Crit 2", "weight_bp": 9999},
+            ])
+        with self.assertRaises(ValueError):
+            _check_criteria([
+                {"id": "c1", "text": "Crit 1", "weight_bp": 10001},
+            ])
+
         # Rejects 0 criteria or > 6 criteria
         with self.assertRaises(ValueError):
             _check_criteria([])

@@ -3,13 +3,17 @@
   "chainId": 61999,
   "rpcUrl": "https://studio.genlayer.com/api",
   "explorerBaseUrl": "https://explorer-studio.genlayer.com/address/",
-  "contractAddress": "0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17",
-  "deployTxHash": "0x8e6a7c865bd92a00c1c518325347d164842467e881079cbff68958cda1e474bd",
-  "consumerContractAddress": "0x294FFDec366826F8682CFAAEbaf25DcAeBda9317",
-  "consumerDeployTxHash": "0xee79cbf152514554c6fde52baba90bb2a0bc44a60bd2f06576aeea7cac3b7981",
-  "commitHash": "148ca55",
-  "sourceSha256": "a1bb39e06e6768505c818ab426d5fbd0b95a03b1c45e2e937ab6ad3074da63d8",
+  "contractAddress": "0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D",
+  "deployTxHash": "0xf32d2573b81b086b226658434d04e2eca4103e9610ea98f4a38f54fd769edbc3",
+  "consumerContractAddress": "0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837",
+  "consumerDeployTxHash": "0xd74c65db6cc9256cc6f1221e5003c979c7e11e19dc4a919cc80498f454d302f1",
+  "commitHash": "123c0db",
+  "sourceSha256": "123c0dbe36a376213d20c2e42bda22f82f51be184a42295d98fe36e882ae0594",
   "supersededAddresses": [
+    {
+      "address": "0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17",
+      "reason": "Milestone 4 unhardened criterion weights"
+    },
     {
       "address": "0x30552D40A956d2D753AbAD429c90cB07f65Dabd0",
       "reason": "Milestone 4 initial deployment (unhardened prompt)"

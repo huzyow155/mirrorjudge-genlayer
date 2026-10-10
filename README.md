@@ -7,9 +7,40 @@
 
 **MirrorJudge** is an Intelligent Contract on GenLayer designed to eliminate order bias and presentation sensitivity in AI-assisted dispute resolution. It implements deterministic anonymization, dual-pass mirroring, code-verified quote grounding, and weighted multi-criteria aggregation to produce verified on-chain **Stability Certificates**.
 
-- **Deployed Contract Address**: [`0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17`](https://explorer-studio.genlayer.com/address/0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17)
-- **Downstream Consumer Contract**: [`0x294FFDec366826F8682CFAAEbaf25DcAeBda9317`](https://explorer-studio.genlayer.com/address/0x294FFDec366826F8682CFAAEbaf25DcAeBda9317)
-- **Network**: GenLayer Studionet (Chain ID: `61999`, Status: Preview)
+---
+
+## Current Deployed Addresses (GenLayer Studionet)
+
+| Role | Contract Address | Deploy Transaction Hash | Explorer Link |
+| :--- | :--- | :--- | :--- |
+| **MirrorJudge (Intelligent Contract)** | `0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D` | `0xf32d2573b81b086b226658434d04e2eca4103e9610ea98f4a38f54fd769edbc3` | [Explorer](https://explorer-studio.genlayer.com/address/0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D) |
+| **MirrorJudgeConsumer (Escrow / Downstream)** | `0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837` | `0xd74c65db6cc9256cc6f1221e5003c979c7e11e19dc4a919cc80498f454d302f1` | [Explorer](https://explorer-studio.genlayer.com/address/0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837) |
+
+- **Network**: GenLayer Studionet (Chain ID: `61999`, Preview RPC: `https://studio.genlayer.com/api`)
+- **Verified Source SHA-256**: `123c0dbe36a376213d20c2e42bda22f82f51be184a42295d98fe36e882ae0594`
+- **Source Byte-for-Byte Match**: Confirmed on-chain via `eth_getTransactionByHash` code extraction.
+
+### Superseded Historical Deployments
+
+| Address | Role | Superseded Reason |
+| :--- | :--- | :--- |
+| `0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17` | MirrorJudge | Pre-hardening deployment lacking strict criterion weight bounds |
+| `0x294FFDec366826F8682CFAAEbaf25DcAeBda9317` | Consumer | Pointed to superseded MirrorJudge address |
+| `0x30552D40A956d2D753AbAD429c90cB07f65Dabd0` | MirrorJudge | Early prototype (unhardened LLM prompt) |
+| `0xd146F4102dCca75dF2977091A3aFd3307D236f78` | MirrorJudgeCore | Milestone 1 core prototype |
+| `0x2106760ca2BD2a55be57A8B68373F65afCdc2Fe2` | Probe | Milestone 0 runtime diagnostic |
+
+---
+
+## Verified Demo Cases On-Chain
+
+All cases exist on the current contract address and are inspectable without a wallet:
+
+| Demo | Case ID | Category | Status & Verdict | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Demo A** | `0551168cd4f5` | Software Milestone | `DECIDED\|PARTY_1\|STABLE` | Clear-cut milestone delivery verified via git logs and counterparty admission. |
+| **Demo B** | `4e4a3aa372e6` | Commercial Lease | `INSUFFICIENT\|NONE\|NA` | Missing counterparty evidence resolved deterministically without LLM bias. |
+| **Demo C** | `8f128188b6c6` | Infrastructure SLA | `DECIDED\|SPLIT\|STABLE` | Symmetrical uptime claims evaluated to a swap-consistent split verdict. |
 
 ---
 
@@ -58,93 +89,32 @@ MirrorJudge addresses this vulnerability: **a verdict is accepted only if it sur
                  +-----------------------+-----------------------+
                                          |
                        [Equivalence Verification]
-                   Do Pass 1 and Pass 2 Agree?
-                   Flips <= max_flips? Margin >= margin_bp?
                                          |
-                    +--------------------+--------------------+
-                    |                                         |
-                    v                                         v
-         DECIDED|PARTY_1|STABLE                    UNSTABLE|NONE|UNSTABLE
-         (Consensus Reached)                       (Escalates to Next Round)
+                +------------------------+------------------------+
+                |                                                 |
+         [Passes Agree?]                                   [Passes Disagree?]
+                |                                                 |
+                v                                                 v
+         STABLE CERTIFICATE                              UNSTABLE CERTIFICATE
+       (Ready for downstream                              (Requires next round
+        smart contract escrow)                             or human arbitration)
 ```
 
-1. **Party Anonymization**: All aliases for Party 1 and Party 2 are replaced case-insensitively with `[PARTY_1]` and `[PARTY_2]`, longest aliases first.
-2. **Dual-Pass Framing**:
-   - **Canonical Pass**: Original presentation order.
-   - **Mirrored Pass**: Evidence submission order is reversed, criteria sequence is reversed, and party labels are swapped (`[PARTY_1]` $\leftrightarrow$ `[PARTY_2]`).
-3. **No Free-Text Decisions**: The LLM is strictly instructed: *"Do NOT decide who wins"*. It only extracts discrete observations per criterion (`favors: PARTY_1 | PARTY_2 | NEITHER | UNCLEAR`) accompanied by a verbatim quote.
-4. **Code-Enforced Grounding**: Python code verifies that quotes are $\ge 12$ characters and exist as normalized substrings in the untrusted evidence block. Unverified quotes are forced to `UNCLEAR`.
-5. **Deterministic Aggregation**: Python code calculates party scores from basis points ($\sum w_i = 10,000$).
-6. **Stability Verification**:
-   - If both passes agree within `max_flips` and exceed `margin_bp`, the round yields `DECIDED|...|STABLE`.
-   - If the passes disagree beyond tolerance, the dispute is marked `UNSTABLE`, triggering bounded multi-round escalation (up to `max_rounds`).
-
 ---
 
-## Consensus Architecture
+## Downstream Consumer Integration
 
-| Pipeline Stage | Non-Deterministic Block | What Validators Compare | Rationale |
-|---|---|---|---|
-| **Pass Execution** | 2 LLM calls per validator node (Canonical + Mirrored) | Nothing (internal to validator execution) | Prevents network latency and raw text variance across LLM providers from breaking consensus. |
-| **Observation Extraction** | Model returns JSON observations and verbatim quotes | Nothing (internal to validator execution) | Minor variations in quote boundaries, whitespace, or synonyms are normalized locally by code. |
-| **Grounding & Scoring** | Deterministic Python substring search and integer scoring | Nothing (internal to validator execution) | Untrusted text is verified locally; fabricated quotes are overridden to `UNCLEAR` with zero score credit. |
-| **Equivalence Principle** | None (computed from pass outputs) | Canonical discrete decision string: `"DECIDED\|PARTY_1\|STABLE"`, `"DECIDED\|SPLIT\|STABLE"`, `"UNSTABLE\|NONE\|UNSTABLE"`, or `"INSUFFICIENT\|NONE\|NA"` | All validators must independently reach the exact same discrete stability determination. |
-
----
-
-## Storage Architecture & Schema
-
-All persistent state is stored in `TreeMap[str, str]` containing canonical JSON strings (`schema_version: "1.0"`):
-
-- `cases: TreeMap[str, str]`: Case record indexed by `case_id` (12 hex characters of `sha256(opener|title|criteria_json)`).
-- `party_cases: TreeMap[str, str]`: Index mapping party address to recent dispute IDs.
-- `pair_cases: TreeMap[str, str]`: Index mapping canonical party pairs (`min:max`) to the latest dispute ID.
-- `all_cases: TreeMap[str, str]`: Paginated index of global dispute IDs.
-
----
-
-## Public Interface
-
-### Write Methods
-- `open_case(title, criteria_json, aliases1_csv, aliases2_csv, opposing) -> str`: Opens a dispute with 1..6 weighted criteria summing to 10,000 basis points.
-- `add_evidence(case_id, text) -> None`: Parties only; up to 3 evidence submissions per party ($\le 1200$ chars each).
-- `judge(case_id) -> str`: Consensus write method. Anyone can call. Evaluates evidence under dual-pass mirroring.
-- `finalize(case_id) -> None`: Parties only; freezes the case.
-
-### View Methods
-- `get_case(case_id: str) -> str`: Returns full case JSON.
-- `get_certificate(case_id: str) -> str`: Returns the on-chain Stability Certificate with configuration, rounds log, and outcome.
-- `outcome_for_consumer(case_id: str) -> str`: Returns machine-readable outcome: `"PARTY_1"`, `"PARTY_2"`, `"SPLIT"`, `"NO_DECISION"`, or `"PENDING"`.
-- `get_cases_by_party(party: str, limit: int) -> str`: Discovery view for party dispute history.
-- `get_latest_case_for_pair(party_a: str, party_b: str) -> str`: Symmetric discovery lookup for a pair of parties.
-- `list_cases(offset: int, limit: int) -> str`: Paginated global case discovery.
-
----
-
-## Downstream Integration Example
-
-Third-party contracts (such as escrow desks, bounties, or insurance agreements) consume MirrorJudge outcomes synchronously:
+Downstream contracts consume stability certificates through the public `outcome_for_consumer(case_id)` view method:
 
 ```python
-# v0.2.16
-# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
-
-from genlayer import *
-
 class EscrowConsumer(gl.Contract):
     judge_address: Address
     escrow_payouts: TreeMap[str, str]
 
-    def __init__(self, judge_address_str: str):
-        self.judge_address = Address(judge_address_str)
-
     @gl.public.write
-    def release_escrow(self, case_id: str) -> str:
+    def execute_payout(self, case_id: str) -> str:
         judge = gl.get_contract_at(self.judge_address)
         outcome = judge.view().outcome_for_consumer(case_id)
-
-        if outcome == "PENDING":
-            raise gl.vm.UserError("dispute is still pending")
 
         if outcome == "PARTY_1":
             self.escrow_payouts[case_id] = "RELEASED_TO_PARTY_1"
@@ -163,37 +133,37 @@ class EscrowConsumer(gl.Contract):
             return "ESCALATED_TO_ARBITRATOR"
 ```
 
-A live deployed consumer contract is verified on Studionet at [`0x294FFDec366826F8682CFAAEbaf25DcAeBda9317`](https://explorer-studio.genlayer.com/address/0x294FFDec366826F8682CFAAEbaf25DcAeBda9317).
+A deployed consumer contract is verified on Studionet at [`0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837`](https://explorer-studio.genlayer.com/address/0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837).
 
 ---
 
 ## Testing & Verification
 
-The contract suite includes 17 unit and integration tests across three layers:
+The contract suite includes 24 unit and integration tests across three layers:
 
 ```bash
 python -m unittest discover tests
 ```
 
-- **Layer 1 (Pure Logic & Biased-Judge Probes)**: Anonymization precedence, label swapping, margin boundary tests, quote grounding validation, and the star test proving that order-biased and label-biased judges are flagged as `UNSTABLE`.
+- **Layer 1 (Pure Logic & Biased-Judge Probes)**: Anonymization precedence, label swapping, margin boundary tests, quote grounding validation, strict integer criterion weight validation (`1 <= weight_bp <= 10000`, non-boolean, sum == 10000), and the star test proving that order-biased and label-biased judges are flagged as `UNSTABLE`.
 - **Layer 2 (Mocked Lifecycle & Discovery)**: Round limits, party permissions, prompt injection resistance, and discovery views.
 - **Layer 3 (Consensus Simulation)**: Committee agreement and divergence modeling under heterogeneous LLM responses.
 
 ---
 
-## Studionet Deployment Steps
+## Studionet Deployment & Validation
 
 ```bash
 # 1. Install dependencies
 npm install
 
 # 2. Verify pure ASCII compliance
-python scripts/scan_ascii.py contracts/MirrorJudge.py
+python scripts/scan_ascii.py
 
 # 3. Verify no secrets
 python scripts/scan_secrets.py
 
-# 4. Deploy and validate live on Studionet
+# 4. Execute on-chain evidence suite on Studionet
 node scripts/deploy/run_live_evidence.js
 ```
 
@@ -207,9 +177,9 @@ node scripts/deploy/run_live_evidence.js
 
 ---
 
-## Future Roadmap: Second-Opinion Desk
+## Second-Opinion Desk dApp
 
-A dedicated user interface called **Second-Opinion Desk** is planned as a separate repository. It will provide side-by-side framing visualization, interactive evidence submission, and real-time Stability Certificate inspection on top of this deployed contract address.
+The official user interface for MirrorJudge is **Second-Opinion Desk** at [https://second-opinion-desk-genlayer.vercel.app](https://second-opinion-desk-genlayer.vercel.app), providing side-by-side framing visualization, interactive evidence submission, and on-chain Stability Certificate inspection.
 
 ---
 

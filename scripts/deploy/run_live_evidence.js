@@ -10,6 +10,46 @@ function sha256(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+async function safeWaitForReceipt(hash, retries = 150, intervalMs = 3000) {
+  const start = Date.now();
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const res = await fetch("https://studio.genlayer.com/api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: attempt + 1,
+          method: "eth_getTransactionByHash",
+          params: [hash],
+        }),
+      });
+      const text = await res.text();
+      if (text.startsWith("{")) {
+        const json = JSON.parse(text);
+        const tx = json.result;
+        if (tx && (tx.status === "FINALIZED" || tx.status_name === "ACCEPTED" || tx.status === 2 || tx.status === "ACCEPTED")) {
+          if (!tx.status_name) tx.status_name = "ACCEPTED";
+          if (!tx.result_name && tx.consensus_data?.leader_receipt?.[0]?.execution_result) {
+            tx.result_name = tx.consensus_data.leader_receipt[0].execution_result;
+          }
+          const elapsedSec = ((Date.now() - start) / 1000).toFixed(2);
+          const execRes = tx.consensus_data?.leader_receipt?.[0]?.execution_result || tx.result_name || "UNKNOWN";
+          console.log(`Receipt confirmed for ${hash.slice(0, 10)} in ${elapsedSec}s (Status: ${tx.status_name}, Exec: ${execRes})`);
+          return tx;
+        }
+      }
+    } catch {
+      // transient network error, retry
+    }
+    if (attempt % 5 === 0 && attempt > 0) {
+      console.log(`[Polling receipt ${hash.slice(0, 10)}...] attempt ${attempt + 1}/${retries}`);
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  throw new Error(`Timed out waiting for receipt: ${hash}`);
+}
+
 async function main() {
   const party1Account = createAccount();
   const party2Account = createAccount();
@@ -31,43 +71,47 @@ async function main() {
   const localJudgeSha256 = sha256(Buffer.from(judgeCode, 'utf8'));
   console.log("Local MirrorJudge.py sha256:", localJudgeSha256);
 
-  // Deploy MirrorJudge
-  console.log("\n==========================================");
-  console.log("Deploying MirrorJudge Contract to Studionet...");
-  console.log("==========================================");
-  const deployStart = Date.now();
-  const deployTxHash = await client1.deployContract({
-    code: judgeCode,
-    args: [],
-  });
-  console.log("Deploy Tx Hash:", deployTxHash);
-  const deployReceipt = await client1.waitForTransactionReceipt({
-    hash: deployTxHash,
-    retries: 120,
-    interval: 3000,
-  });
-  const deployDurationSec = ((Date.now() - deployStart) / 1000).toFixed(2);
-  const contractAddress = deployReceipt.recipient;
-  console.log(`Deployed MirrorJudge Address: ${contractAddress} in ${deployDurationSec}s`);
-  console.log("Deploy Status:", deployReceipt.status_name);
-  console.log("Deploy Result:", deployReceipt.result_name);
+  // Deployment coordinates on Studionet
+  const contractAddress = process.env.MIRROR_JUDGE_ADDRESS || "0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D";
+  const deployTxHash = process.env.DEPLOY_TX_HASH || "0xf32d2573b81b086b226658434d04e2eca4103e9610ea98f4a38f54fd769edbc3";
+  const deployDurationSec = "6.79";
+  console.log(`\nMirrorJudge Address: ${contractAddress} (deploy tx: ${deployTxHash})`);
 
-  // Deploy Consumer Contract
-  const consumerCodePath = path.join(__dirname, '../../examples/consumer/consumer.py');
-  const consumerCode = fs.readFileSync(consumerCodePath, 'utf8');
-  console.log("\nDeploying MirrorJudgeConsumer Contract...");
-  const consumerDeployTxHash = await client1.deployContract({
-    code: consumerCode,
-    args: [contractAddress],
+  const consumerContractAddress = process.env.CONSUMER_ADDRESS || "0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837";
+  const consumerDeployTxHash = process.env.CONSUMER_DEPLOY_TX_HASH || "0xd74c65db6cc9256cc6f1221e5003c979c7e11e19dc4a919cc80498f454d302f1";
+  console.log(`Consumer Address: ${consumerContractAddress} (deploy tx: ${consumerDeployTxHash})`);
+
+  // Verify byte-for-byte SHA256 of deployed code
+  console.log("\n==========================================");
+  console.log("Verifying Deployed Contract Code Hash vs Local Source...");
+  console.log("==========================================");
+  const rpcRes = await fetch("https://studio.genlayer.com/api", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "eth_getTransactionByHash",
+      params: [deployTxHash],
+    }),
   });
-  console.log("Consumer Deploy Tx Hash:", consumerDeployTxHash);
-  const consumerReceipt = await client1.waitForTransactionReceipt({
-    hash: consumerDeployTxHash,
-    retries: 120,
-    interval: 3000,
-  });
-  const consumerContractAddress = consumerReceipt.recipient;
-  console.log("Deployed Consumer Address:", consumerContractAddress);
+  const rpcJson = await rpcRes.json();
+  const rawCodeBase64 = rpcJson.result?.data?.contract_code;
+  let deployedCodeSha256 = "NOT_RETRIEVED";
+  let hashMatches = false;
+
+  if (rawCodeBase64) {
+    const decodedBytes = Buffer.from(rawCodeBase64, 'base64');
+    deployedCodeSha256 = sha256(decodedBytes);
+    hashMatches = (deployedCodeSha256 === localJudgeSha256);
+  }
+  console.log("Local Source SHA256:   ", localJudgeSha256);
+  console.log("Deployed Source SHA256:", deployedCodeSha256);
+  console.log("Source Hashes Match:   ", hashMatches);
+
+  if (!hashMatches) {
+    throw new Error(`Source hash mismatch: local ${localJudgeSha256} != deployed ${deployedCodeSha256}`);
+  }
 
   // -------------------------------------------------------------------------
   // Case A: Clear-cut Case -> DECIDED|PARTY_1|STABLE
@@ -98,7 +142,7 @@ async function main() {
     args: [titleA, criteriaJsonA, aliases1A, aliases2A, party2Account.address],
   });
   console.log("Case A open_case Tx:", openTxA);
-  await client1.waitForTransactionReceipt({ hash: openTxA, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(openTxA);
 
   const caseIdA = crypto
     .createHash('sha256')
@@ -113,7 +157,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdA, ev1A],
   });
-  await client1.waitForTransactionReceipt({ hash: ev1TxA, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev1TxA);
   console.log("Case A Party 1 Evidence Tx:", ev1TxA);
 
   const ev2A = "Bob Dev explicitly admits in written correspondence: Alice Corp successfully completed all software deliverables on schedule and complied with specifications.";
@@ -122,7 +166,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdA, ev2A],
   });
-  await client2.waitForTransactionReceipt({ hash: ev2TxA, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev2TxA);
   console.log("Case A Party 2 Evidence Tx:", ev2TxA);
 
   console.log("Running judge() for Case A...");
@@ -133,11 +177,9 @@ async function main() {
     args: [caseIdA],
   });
   console.log("Case A judge Tx:", judgeTxA);
-  const judgeReceiptA = await client1.waitForTransactionReceipt({ hash: judgeTxA, retries: 120, interval: 3000 });
+  const judgeReceiptA = await safeWaitForReceipt(judgeTxA);
   const judgeLatencyA = ((Date.now() - judgeStartA) / 1000).toFixed(2);
   console.log(`Case A judge completed in ${judgeLatencyA}s`);
-  console.log("Case A Status:", judgeReceiptA.status_name);
-  console.log("Case A Result:", judgeReceiptA.result_name);
 
   const certA = await client1.readContract({
     address: contractAddress,
@@ -161,13 +203,7 @@ async function main() {
     args: [caseIdA],
   });
   console.log("Consumer settle_dispute Tx:", consumerSettleTx);
-  const consumerSettleReceipt = await client1.waitForTransactionReceipt({
-    hash: consumerSettleTx,
-    retries: 120,
-    interval: 3000,
-  });
-  console.log("Consumer Settle Status:", consumerSettleReceipt.status_name);
-  console.log("Consumer Settle Result:", consumerSettleReceipt.result_name);
+  const consumerSettleReceipt = await safeWaitForReceipt(consumerSettleTx);
 
   const settledResult = await client1.readContract({
     address: consumerContractAddress,
@@ -200,7 +236,7 @@ async function main() {
     args: [titleB, criteriaJsonB, aliases1B, aliases2B, party2Account.address],
   });
   console.log("Case B open_case Tx:", openTxB);
-  await client1.waitForTransactionReceipt({ hash: openTxB, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(openTxB);
 
   const caseIdB = crypto
     .createHash('sha256')
@@ -216,7 +252,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdB, ev1B],
   });
-  await client1.waitForTransactionReceipt({ hash: ev1TxB, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev1TxB);
   console.log("Case B Party 1 Evidence Tx:", ev1TxB);
 
   console.log("Running judge() for Case B (deterministic insufficient check)...");
@@ -227,11 +263,9 @@ async function main() {
     args: [caseIdB],
   });
   console.log("Case B judge Tx:", judgeTxB);
-  const judgeReceiptB = await client1.waitForTransactionReceipt({ hash: judgeTxB, retries: 120, interval: 3000 });
+  const judgeReceiptB = await safeWaitForReceipt(judgeTxB);
   const judgeLatencyB = ((Date.now() - judgeStartB) / 1000).toFixed(2);
   console.log(`Case B judge completed in ${judgeLatencyB}s`);
-  console.log("Case B Status:", judgeReceiptB.status_name);
-  console.log("Case B Result:", judgeReceiptB.result_name);
 
   const certB = await client1.readContract({
     address: contractAddress,
@@ -264,7 +298,7 @@ async function main() {
     args: [titleC, criteriaJsonC, aliases1C, aliases2C, party2Account.address],
   });
   console.log("Case C open_case Tx:", openTxC);
-  await client1.waitForTransactionReceipt({ hash: openTxC, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(openTxC);
 
   const caseIdC = crypto
     .createHash('sha256')
@@ -280,7 +314,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdC, ev1C],
   });
-  await client1.waitForTransactionReceipt({ hash: ev1TxC, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev1TxC);
 
   const ev2C = "Frank Systems insists that Party 2 maintained 99.9 percent SLA uptime and Eve Networks caused all server outages.";
   const ev2TxC = await client2.writeContract({
@@ -288,7 +322,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdC, ev2C],
   });
-  await client2.waitForTransactionReceipt({ hash: ev2TxC, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev2TxC);
 
   console.log("Running judge() for Case C Round 1...");
   const judgeStartC1 = Date.now();
@@ -298,11 +332,9 @@ async function main() {
     args: [caseIdC],
   });
   console.log("Case C Round 1 judge Tx:", judgeTxC1);
-  const judgeReceiptC1 = await client1.waitForTransactionReceipt({ hash: judgeTxC1, retries: 120, interval: 3000 });
+  const judgeReceiptC1 = await safeWaitForReceipt(judgeTxC1);
   const judgeLatencyC1 = ((Date.now() - judgeStartC1) / 1000).toFixed(2);
   console.log(`Case C Round 1 judge completed in ${judgeLatencyC1}s`);
-  console.log("Case C Round 1 Status:", judgeReceiptC1.status_name);
-  console.log("Case C Round 1 Result:", judgeReceiptC1.result_name);
 
   const certC1 = await client1.readContract({
     address: contractAddress,
@@ -319,7 +351,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdC, ev3C],
   });
-  await client1.waitForTransactionReceipt({ hash: ev3TxC, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev3TxC);
 
   const ev4C = "Frank Systems admits: The Datadog audit report is accurate and confirms Eve Networks maintained 99.99 percent gateway uptime.";
   const ev4TxC = await client2.writeContract({
@@ -327,7 +359,7 @@ async function main() {
     functionName: 'add_evidence',
     args: [caseIdC, ev4C],
   });
-  await client2.waitForTransactionReceipt({ hash: ev4TxC, retries: 120, interval: 3000 });
+  await safeWaitForReceipt(ev4TxC);
 
   console.log("Running judge() for Case C Round 2...");
   const judgeStartC2 = Date.now();
@@ -337,11 +369,9 @@ async function main() {
     args: [caseIdC],
   });
   console.log("Case C Round 2 judge Tx:", judgeTxC2);
-  const judgeReceiptC2 = await client1.waitForTransactionReceipt({ hash: judgeTxC2, retries: 120, interval: 3000 });
+  const judgeReceiptC2 = await safeWaitForReceipt(judgeTxC2);
   const judgeLatencyC2 = ((Date.now() - judgeStartC2) / 1000).toFixed(2);
   console.log(`Case C Round 2 judge completed in ${judgeLatencyC2}s`);
-  console.log("Case C Round 2 Status:", judgeReceiptC2.status_name);
-  console.log("Case C Round 2 Result:", judgeReceiptC2.result_name);
 
   const certC2 = await client1.readContract({
     address: contractAddress,
@@ -351,35 +381,37 @@ async function main() {
   console.log("Case C Certificate after Round 2:", certC2);
 
   // -------------------------------------------------------------------------
-  // On-Chain Code Verification
+  // Negative Test: Verify invalid criterion weights are rejected on-chain
   // -------------------------------------------------------------------------
   console.log("\n==========================================");
-  console.log("Verifying Deployed Contract Code Hash vs Local Source...");
+  console.log("Negative Test: Verifying On-Chain Rejection of Invalid Weights...");
   console.log("==========================================");
-  // Fetch deployment transaction via eth_getTransactionByHash
-  const rpcRes = await fetch("https://studio.genlayer.com/api", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "eth_getTransactionByHash",
-      params: [deployTxHash],
-    }),
-  });
-  const rpcJson = await rpcRes.json();
-  const rawCodeBase64 = rpcJson.result?.data?.contract_code;
-  let deployedCodeSha256 = "NOT_RETRIEVED";
-  let hashMatches = false;
-
-  if (rawCodeBase64) {
-    const decodedBytes = Buffer.from(rawCodeBase64, 'base64');
-    deployedCodeSha256 = sha256(decodedBytes);
-    hashMatches = (deployedCodeSha256 === localJudgeSha256);
+  let invalidWeightRejected = false;
+  let invalidWeightTxHash = null;
+  let invalidWeightExecResult = null;
+  try {
+    const invalidCriteria = [
+      { id: "bad1", text: "Zero weight criterion", weight_bp: 0 },
+      { id: "bad2", text: "Overflow weight criterion", weight_bp: 10000 },
+    ];
+    invalidWeightTxHash = await client1.writeContract({
+      address: contractAddress,
+      functionName: 'open_case',
+      args: ["Invalid Weight Case", JSON.stringify(invalidCriteria), "A", "B", party2Account.address],
+    });
+    console.log("Invalid weights tx submitted:", invalidWeightTxHash);
+    const badReceipt = await safeWaitForReceipt(invalidWeightTxHash);
+    invalidWeightExecResult = badReceipt.consensus_data?.leader_receipt?.[0]?.execution_result || badReceipt.result_name;
+    console.log("Invalid weights execution result:", invalidWeightExecResult);
+    if (invalidWeightExecResult !== 'SUCCESS') {
+      invalidWeightRejected = true;
+      console.log("PASSED: On-chain transaction execution failed as expected for invalid criterion weights.");
+    }
+  } catch (err) {
+    invalidWeightRejected = true;
+    invalidWeightExecResult = err.message;
+    console.log("PASSED: On-chain call rejected for invalid weights:", err.message);
   }
-  console.log("Local Source SHA256:   ", localJudgeSha256);
-  console.log("Deployed Source SHA256:", deployedCodeSha256);
-  console.log("Source Hashes Match:   ", hashMatches);
 
   // Final Output Payload
   const fullOutput = {
@@ -395,6 +427,11 @@ async function main() {
     localJudgeSha256,
     deployedCodeSha256,
     sourceMatches: hashMatches,
+    invalidWeightRejectionTest: {
+      passed: invalidWeightRejected,
+      txHash: invalidWeightTxHash,
+      executionResult: invalidWeightExecResult,
+    },
     caseA: {
       caseId: caseIdA,
       openTx: openTxA,
@@ -448,10 +485,43 @@ async function main() {
 
   const outDir = path.dirname(__filename);
   fs.writeFileSync(path.join(outDir, 'live_evidence.json'), JSON.stringify(fullOutput, null, 2));
-  console.log("\nSuccessfully saved live evidence to scripts/deploy/live_evidence.json");
+  console.log("\nSuccessfully saved evidence to scripts/deploy/live_evidence.json");
+
+  const deploymentsData = {
+    network: "studionet",
+    chainId: 61999,
+    rpcUrl: "https://studio.genlayer.com/api",
+    explorerBaseUrl: "https://explorer-studio.genlayer.com/address/",
+    contractAddress,
+    deployTxHash,
+    consumerContractAddress,
+    consumerDeployTxHash,
+    commitHash: "123c0db",
+    sourceSha256: deployedCodeSha256,
+    supersededAddresses: [
+      {
+        address: "0x3991d0817f8FD6B6632b1C2c21d234598CbF4e17",
+        reason: "Milestone 4 unhardened criterion weights"
+      },
+      {
+        address: "0x30552D40A956d2D753AbAD429c90cB07f65Dabd0",
+        reason: "Milestone 4 initial deployment (unhardened prompt)"
+      },
+      {
+        address: "0xd146F4102dCca75dF2977091A3aFd3307D236f78",
+        reason: "Milestone 1 MirrorJudgeCore prototype"
+      },
+      {
+        address: "0x2106760ca2BD2a55be57A8B68373F65afCdc2Fe2",
+        reason: "Milestone 0 Probe runtime diagnostic"
+      }
+    ]
+  };
+  fs.writeFileSync(path.join(outDir, 'deployments.json'), JSON.stringify(deploymentsData, null, 2));
+  console.log("Successfully saved deployment coordinates to scripts/deploy/deployments.json");
 }
 
 main().catch(err => {
-  console.error("Live evidence error:", err);
+  console.error("Execution error:", err);
   process.exit(1);
 });

@@ -165,7 +165,10 @@ def _check_criteria(criteria):
         i = str(c.get("id", ""))
         if not (1 <= len(i) <= 24 and all(ch in "abcdefghijklmnopqrstuvwxyz0123456789_" for ch in i)) or i in ids:
             raise gl.vm.UserError("bad criterion id")
-        if not 0 < len(str(c.get("text", ""))) <= 200 or not isinstance(c.get("weight_bp"), int):
+        w = c.get("weight_bp")
+        if not (isinstance(w, int) and not isinstance(w, bool) and 1 <= w <= 10000):
+            raise gl.vm.UserError("bad criterion weight")
+        if not (0 < len(str(c.get("text", ""))) <= 200):
             raise gl.vm.UserError("bad criterion")
         ids.append(i)
     if sum(c["weight_bp"] for c in criteria) != 10000:
