@@ -9,14 +9,14 @@
 
 ---
 
-## Current Deployed Addresses (GenLayer Studionet)
+## Current Deployed Addresses (GenLayer Studionet (Preview))
 
 | Role | Contract Address | Deploy Transaction Hash | Explorer Link |
 | :--- | :--- | :--- | :--- |
 | **MirrorJudge (Intelligent Contract)** | `0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D` | `0xf32d2573b81b086b226658434d04e2eca4103e9610ea98f4a38f54fd769edbc3` | [Explorer](https://explorer-studio.genlayer.com/address/0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D) |
 | **MirrorJudgeConsumer (Escrow / Downstream)** | `0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837` | `0xd74c65db6cc9256cc6f1221e5003c979c7e11e19dc4a919cc80498f454d302f1` | [Explorer](https://explorer-studio.genlayer.com/address/0x4FC86C019ec00Aa911A4D34986e33be2Cd94b837) |
 
-- **Network**: GenLayer Studionet (Chain ID: `61999`, Preview RPC: `https://studio.genlayer.com/api`)
+- **Network**: GenLayer Studionet (Preview) (Chain ID: `61999`, RPC: `https://studio.genlayer.com/api`)
 - **Verified Source SHA-256**: `123c0dbe36a376213d20c2e42bda22f82f51be184a42295d98fe36e882ae0594`
 - **Source Byte-for-Byte Match**: Confirmed on-chain via `eth_getTransactionByHash` code extraction.
 
@@ -34,24 +34,34 @@
 
 ## Verified Demo Cases On-Chain
 
-All cases exist on the current contract address and are inspectable without a wallet:
+All cases exist on the current contract address (`0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D`), are documented in `scripts/deploy/live_evidence.json`, and are inspectable without a wallet:
 
 | Demo | Case ID | Category | Status & Verdict | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **Demo A** | `0551168cd4f5` | Software Milestone | `DECIDED\|PARTY_1\|STABLE` | Clear-cut milestone delivery verified via git logs and counterparty admission. |
 | **Demo B** | `4e4a3aa372e6` | Commercial Lease | `INSUFFICIENT\|NONE\|NA` | Missing counterparty evidence resolved deterministically without LLM bias. |
 | **Demo C** | `8f128188b6c6` | Infrastructure SLA | `DECIDED\|SPLIT\|STABLE` | Symmetrical uptime claims evaluated to a swap-consistent split verdict. |
+| **Demo D** | `cbbed41fefc3` | Escrow Addendum | `UNSTABLE\|NONE\|UNSTABLE` | Ambiguous addendum attribution where canonical and mirrored passes diverge. |
+
+### On-Chain Verification of `UNSTABLE` Case (`cbbed41fefc3`)
+
+- **`open_case` Tx**: `0xa3e30f86e5677c7b069b3c42bd2769a6f90e27570cca39c24a2017151e4ff2aa`
+- **Party 1 `add_evidence` Tx**: `0x1edb1ec2e78ab87cb4396d5548df6426ea47615f36ac4249f73455c9355b3bae`
+- **Party 2 `add_evidence` Tx**: `0xa4605d01bf0f17c5ca6264f75f355d9f4a351343058e69021a28eb94c774f8bd`
+- **`judge` Tx**: `0x8472dbad8e0bdc0f3049db16ca509e3b539a5d938b2bff5a389aff2d16e2c3a2` (Accepted by validators, `MAJORITY_AGREE`, `leaderResult: SUCCESS`, `31.89s`)
+- **RPC View Call**: `readContract({ address: "0x1343C51732FD1002986Ed3f0Bb9D5C2105A6635D", functionName: "get_certificate", args: ["cbbed41fefc3"] })`
+- **Field Read**: `JSON.parse(certificate).current_decision === "UNSTABLE|NONE|UNSTABLE"` and `rounds[0].decision === "UNSTABLE|NONE|UNSTABLE"`
 
 ---
 
 ## The Problem: The Consensus Illusion in LLM Judges
 
 Large language models are vulnerable to subtle cognitive biases:
-1. **Position Bias**: LLMs consistently favor the first or last presented party or statement.
+1. **Position Bias**: LLMs consistently favor the initial or concluding presented party or statement.
 2. **Label Sensitivity**: Disparate party names, titles, or corporate labels warp LLM preferences.
 3. **The Consensus Illusion**: When multiple validators run the same prompt template on the same presentation order, their shared directional biases compound into an artificial majority agreement on an unjust outcome.
 
-MirrorJudge addresses this vulnerability: **a verdict is accepted only if it survives mirroring**.
+MirrorJudge addresses this vulnerability: **a verdict is accepted when it survives mirroring**.
 
 ---
 
@@ -76,7 +86,7 @@ MirrorJudge addresses this vulnerability: **a verdict is accepted only if it sur
                  |                                               |
                  v                                               v
          [LLM Observation]                               [LLM Observation]
-       Extracts quotes only                            Extracts quotes only
+       Extracts grounded quotes                        Extracts grounded quotes
                  |                                               |
                  v                                               v
      [Code Grounding Check]                          [Code Grounding Check]
@@ -171,7 +181,7 @@ node scripts/deploy/run_live_evidence.js
 
 ## Known Limitations
 
-- **Two Parties Only**: MirrorJudge is designed for two adversarial parties (Party 1 vs Party 2). Multi-party disputes require pairwise reduction.
+- **Two-Party Scope**: MirrorJudge is designed for two adversarial parties (Party 1 vs Party 2). Multi-party disputes require pairwise reduction.
 - **Evidence-Bound Verification**: The contract verifies that quotes exist within submitted evidence; it does not independently verify physical real-world facts beyond the submitted record.
 - **Consensus Latency**: Each round executes two LLM passes per validator. Consensus latency typically ranges from 19 to 53 seconds on Studionet.
 

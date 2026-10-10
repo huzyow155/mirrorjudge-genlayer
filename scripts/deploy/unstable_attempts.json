@@ -1,0 +1,51 @@
+[
+  {
+    "attempt": 1,
+    "caseId": "cbbed41fefc3",
+    "opener": "0x1d0f0b77EaE3CeA5071470795cd1BC9e25Ab8156",
+    "opposing": "0xC8014F4390875FA6B3f2E90010739FD4D3b14607",
+    "openTx": "0xa3e30f86e5677c7b069b3c42bd2769a6f90e27570cca39c24a2017151e4ff2aa",
+    "ev1Tx": "0x1edb1ec2e78ab87cb4396d5548df6426ea47615f36ac4249f73455c9355b3bae",
+    "ev2Tx": "0xa4605d01bf0f17c5ca6264f75f355d9f4a351343058e69021a28eb94c774f8bd",
+    "judgeTx": "0x8472dbad8e0bdc0f3049db16ca509e3b539a5d938b2bff5a389aff2d16e2c3a2",
+    "judgeLatencySec": "31.89",
+    "receiptStatus": "ACCEPTED",
+    "receiptResult": "MAJORITY_AGREE",
+    "leaderResult": "SUCCESS",
+    "currentDecision": "UNSTABLE|NONE|UNSTABLE",
+    "certificate": {
+      "schema_version": "1.0",
+      "case_id": "cbbed41fefc3",
+      "title": "Cross-Border Escrow & SLA Addendum Attribution Dispute",
+      "opener": "0x1d0f0b77EaE3CeA5071470795cd1BC9e25Ab8156",
+      "opposing": "0xC8014F4390875FA6B3f2E90010739FD4D3b14607",
+      "status": "OPEN",
+      "config": {
+        "margin_bp": 1500,
+        "max_flips": 1,
+        "max_rounds": 3,
+        "criteria": [
+          {
+            "id": "latency_benchmark",
+            "text": "Which party substantiated compliance with the primary API latency benchmark and addendum: PARTY_1 or PARTY_2?",
+            "weight_bp": 5000
+          },
+          {
+            "id": "settlement_attribution",
+            "text": "Which party is designated as the compliant operator under the joint audit addendum: PARTY_1 or PARTY_2?",
+            "weight_bp": 5000
+          }
+        ]
+      },
+      "rounds": [
+        {
+          "n": 1,
+          "decision": "UNSTABLE|NONE|UNSTABLE"
+        }
+      ],
+      "current_decision": "UNSTABLE|NONE|UNSTABLE",
+      "is_decided": false,
+      "outcome": "PENDING"
+    }
+  }
+]
